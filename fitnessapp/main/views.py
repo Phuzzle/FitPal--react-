@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from fitnessapp.models import User
+from fitnessapp.models import User, Exercise
 from . import main
 
 @main.route('/')
@@ -70,3 +70,45 @@ def workout_stats():
         return jsonify({"message": "No workout data available"}), 404
 
     return jsonify(stats), 200
+
+@main.route('/exercises', methods=['POST'])
+@jwt_required()
+def create_exercise():
+    exercise_data = request.get_json()
+    if not exercise_data:
+        return jsonify({"message": "No exercise data provided"}), 400
+
+    required_fields = ['name', 'type', 'muscle_group', 'description', 'instructions']
+    if not all(field in exercise_data for field in required_fields):
+        return jsonify({"message": "Missing required exercise data"}), 400
+
+    new_exercise = Exercise.create_exercise(**exercise_data)
+    return jsonify({"message": "Exercise created successfully", "exercise": new_exercise.to_dict()}), 201
+
+@main.route('/exercises/<exercise_id>', methods=['GET'])
+@jwt_required()
+def get_exercise(exercise_id):
+    exercise = Exercise.get_exercise_by_id(exercise_id)
+    if not exercise:
+        return jsonify({"message": "Exercise not found"}), 404
+    return jsonify(exercise.to_dict()), 200
+
+@main.route('/exercises/muscle_group/<muscle_group>', methods=['GET'])
+@jwt_required()
+def get_exercises_by_muscle_group(muscle_group):
+    exercises = Exercise.get_exercises_by_muscle_group(muscle_group)
+    return jsonify([exercise.to_dict() for exercise in exercises]), 200
+
+@main.route('/exercises/<exercise_id>', methods=['PUT'])
+@jwt_required()
+def update_exercise(exercise_id):
+    exercise = Exercise.get_exercise_by_id(exercise_id)
+    if not exercise:
+        return jsonify({"message": "Exercise not found"}), 404
+
+    update_data = request.get_json()
+    if not update_data:
+        return jsonify({"message": "No update data provided"}), 400
+
+    exercise.update(**update_data)
+    return jsonify({"message": "Exercise updated successfully", "exercise": exercise.to_dict()}), 200

@@ -3,6 +3,62 @@ from firebase_admin import firestore
 import datetime
 from statistics import mean
 
+from uuid import uuid4
+
+class Exercise:
+    def __init__(self, name, type, muscle_group, description, instructions, 
+                 default_weight=None, default_sets=3, default_reps=10):
+        self.exercise_id = str(uuid4())
+        self.name = name
+        self.type = type
+        self.muscle_group = muscle_group
+        self.description = description
+        self.instructions = instructions
+        self.default_weight = default_weight
+        self.default_sets = default_sets
+        self.default_reps = default_reps
+
+    @staticmethod
+    def create_exercise(name, type, muscle_group, description, instructions, 
+                        default_weight=None, default_sets=3, default_reps=10):
+        # This method would interact with the database to create a new exercise
+        exercise = Exercise(name, type, muscle_group, description, instructions, 
+                            default_weight, default_sets, default_reps)
+        # Here you would save the exercise to the database
+        return exercise
+
+    @staticmethod
+    def get_exercise_by_id(exercise_id):
+        # This method would retrieve an exercise from the database by its ID
+        # For now, we'll return None to indicate it's not implemented
+        return None
+
+    @staticmethod
+    def get_exercises_by_muscle_group(muscle_group):
+        # This method would retrieve all exercises for a specific muscle group
+        # For now, we'll return an empty list to indicate it's not implemented
+        return []
+
+    def update(self, **kwargs):
+        # This method would update the exercise's attributes
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        # Here you would save the updated exercise to the database
+
+    def to_dict(self):
+        return {
+            'exercise_id': self.exercise_id,
+            'name': self.name,
+            'type': self.type,
+            'muscle_group': self.muscle_group,
+            'description': self.description,
+            'instructions': self.instructions,
+            'default_weight': self.default_weight,
+            'default_sets': self.default_sets,
+            'default_reps': self.default_reps
+        }
+
 class User:
     def __init__(self, user_id, email, password_hash, account_created=None, last_login=None):
         self.user_id = user_id
