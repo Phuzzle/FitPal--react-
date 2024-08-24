@@ -48,6 +48,6 @@ def profile():
     return jsonify({
         "user_id": user.user_id,
         "email": user.email,
-        "account_created": user.account_created,
-        "last_login": user.last_login
+        "account_created": user.account_created.isoformat() if user.account_created else None,
+        "last_login": user.last_login.isoformat() if user.last_login else None
     }), 200

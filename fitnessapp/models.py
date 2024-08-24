@@ -4,12 +4,12 @@ import datetime
 from statistics import mean
 
 class User:
-    def __init__(self, user_id, email, password_hash):
+    def __init__(self, user_id, email, password_hash, account_created=None, last_login=None):
         self.user_id = user_id
         self.email = email
         self.password_hash = password_hash
-        self.account_created = firestore.SERVER_TIMESTAMP
-        self.last_login = firestore.SERVER_TIMESTAMP
+        self.account_created = account_created
+        self.last_login = last_login
 
     @staticmethod
     def create_user(email, password_hash):
