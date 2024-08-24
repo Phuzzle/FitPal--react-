@@ -112,3 +112,9 @@ def update_exercise(exercise_id):
 
     exercise.update(**update_data)
     return jsonify({"message": "Exercise updated successfully", "exercise": exercise.to_dict()}), 200
+
+@main.route('/exercises', methods=['GET'])
+@jwt_required()
+def list_exercises():
+    exercises = Exercise.get_all_exercises()
+    return jsonify([exercise.to_dict() for exercise in exercises]), 200

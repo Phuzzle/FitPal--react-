@@ -8,7 +8,7 @@ from uuid import uuid4
 class Exercise:
     def __init__(self, name, type, muscle_group, description, instructions, 
                  default_weight=None, default_sets=3, default_reps=10):
-        self.exercise_id = str(uuid4())
+        self.exercise_id = None  # Will be set when saved to the database
         self.name = name
         self.type = type
         self.muscle_group = muscle_group
@@ -21,30 +21,80 @@ class Exercise:
     @staticmethod
     def create_exercise(name, type, muscle_group, description, instructions, 
                         default_weight=None, default_sets=3, default_reps=10):
-        # This method would interact with the database to create a new exercise
         exercise = Exercise(name, type, muscle_group, description, instructions, 
                             default_weight, default_sets, default_reps)
-        # Here you would save the exercise to the database
+        exercise_ref = db.collection('exercises').document()
+        exercise_ref.set(exercise.to_dict())
+        exercise.exercise_id = exercise_ref.id
         return exercise
 
     @staticmethod
     def get_exercise_by_id(exercise_id):
-        # This method would retrieve an exercise from the database by its ID
-        # For now, we'll return None to indicate it's not implemented
+        exercise_ref = db.collection('exercises').document(exercise_id)
+        exercise_doc = exercise_ref.get()
+        if exercise_doc.exists:
+            exercise_data = exercise_doc.to_dict()
+            exercise = Exercise(
+                name=exercise_data['name'],
+                type=exercise_data['type'],
+                muscle_group=exercise_data['muscle_group'],
+                description=exercise_data['description'],
+                instructions=exercise_data['instructions'],
+                default_weight=exercise_data.get('default_weight'),
+                default_sets=exercise_data.get('default_sets', 3),
+                default_reps=exercise_data.get('default_reps', 10)
+            )
+            exercise.exercise_id = exercise_id
+            return exercise
         return None
 
     @staticmethod
     def get_exercises_by_muscle_group(muscle_group):
-        # This method would retrieve all exercises for a specific muscle group
-        # For now, we'll return an empty list to indicate it's not implemented
-        return []
+        exercises_ref = db.collection('exercises').where('muscle_group', '==', muscle_group)
+        exercises = []
+        for doc in exercises_ref.stream():
+            exercise_data = doc.to_dict()
+            exercise = Exercise(
+                name=exercise_data['name'],
+                type=exercise_data['type'],
+                muscle_group=exercise_data['muscle_group'],
+                description=exercise_data['description'],
+                instructions=exercise_data['instructions'],
+                default_weight=exercise_data.get('default_weight'),
+                default_sets=exercise_data.get('default_sets', 3),
+                default_reps=exercise_data.get('default_reps', 10)
+            )
+            exercise.exercise_id = doc.id
+            exercises.append(exercise)
+        return exercises
+
+    @staticmethod
+    def get_all_exercises():
+        exercises_ref = db.collection('exercises')
+        exercises = []
+        for doc in exercises_ref.stream():
+            exercise_data = doc.to_dict()
+            exercise = Exercise(
+                name=exercise_data['name'],
+                type=exercise_data['type'],
+                muscle_group=exercise_data['muscle_group'],
+                description=exercise_data['description'],
+                instructions=exercise_data['instructions'],
+                default_weight=exercise_data.get('default_weight'),
+                default_sets=exercise_data.get('default_sets', 3),
+                default_reps=exercise_data.get('default_reps', 10)
+            )
+            exercise.exercise_id = doc.id
+            exercises.append(exercise)
+        return exercises
 
     def update(self, **kwargs):
-        # This method would update the exercise's attributes
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-        # Here you would save the updated exercise to the database
+        if self.exercise_id:
+            exercise_ref = db.collection('exercises').document(self.exercise_id)
+            exercise_ref.update(self.to_dict())
 
     def to_dict(self):
         return {
