@@ -7,8 +7,8 @@ from uuid import uuid4
 
 class Exercise:
     def __init__(self, name, type, muscle_group, description, instructions, 
-                 default_weight=None, default_sets=3, default_reps=10):
-        self.exercise_id = None  # Will be set when saved to the database
+                 default_weight=None, default_sets=3, default_reps=10, exercise_id=None):
+        self.exercise_id = exercise_id
         self.name = name
         self.type = type
         self.muscle_group = muscle_group
@@ -21,11 +21,11 @@ class Exercise:
     @staticmethod
     def create_exercise(name, type, muscle_group, description, instructions, 
                         default_weight=None, default_sets=3, default_reps=10):
-        exercise = Exercise(name, type, muscle_group, description, instructions, 
-                            default_weight, default_sets, default_reps)
         exercise_ref = db.collection('exercises').document()
+        exercise_id = exercise_ref.id
+        exercise = Exercise(name, type, muscle_group, description, instructions, 
+                            default_weight, default_sets, default_reps, exercise_id)
         exercise_ref.set(exercise.to_dict())
-        exercise.exercise_id = exercise_ref.id
         return exercise
 
     @staticmethod

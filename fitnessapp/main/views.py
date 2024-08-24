@@ -83,7 +83,8 @@ def create_exercise():
         return jsonify({"message": "Missing required exercise data"}), 400
 
     new_exercise = Exercise.create_exercise(**exercise_data)
-    return jsonify({"message": "Exercise created successfully", "exercise": new_exercise.to_dict()}), 201
+    exercise_dict = new_exercise.to_dict()
+    return jsonify({"message": "Exercise created successfully", "exercise": exercise_dict}), 201
 
 @main.route('/exercises/<exercise_id>', methods=['GET'])
 @jwt_required()
@@ -109,6 +110,12 @@ def update_exercise(exercise_id):
     update_data = request.get_json()
     if not update_data:
         return jsonify({"message": "No update data provided"}), 400
+
+    # Validate the update data
+    allowed_fields = ['name', 'type', 'muscle_group', 'description', 'instructions', 'default_weight', 'default_sets', 'default_reps']
+    for key in update_data.keys():
+        if key not in allowed_fields:
+            return jsonify({"message": f"Invalid field: {key}"}), 400
 
     exercise.update(**update_data)
     return jsonify({"message": "Exercise updated successfully", "exercise": exercise.to_dict()}), 200
