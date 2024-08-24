@@ -1,0 +1,4 @@
+.aider*
+venv*
+firebase-credentials.json
+.env

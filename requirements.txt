@@ -1,3 +1,4 @@
 Flask
 firebase-admin
+python-dotenv
 # Add other dependencies here

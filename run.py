@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from myflaskapp import create_app
+from fitnessapp import create_app
 
 # Load environment variables from .env file
 load_dotenv()
