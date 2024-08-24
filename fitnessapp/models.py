@@ -31,7 +31,13 @@ class User:
         results = query.get()
         for doc in results:
             user_data = doc.to_dict()
-            return User(user_data['user_id'], user_data['email'], user_data['password_hash'])
+            return User(
+                user_data['user_id'],
+                user_data['email'],
+                user_data['password_hash'],
+                user_data.get('account_created'),
+                user_data.get('last_login')
+            )
         return None
 
     def update_last_login(self):
@@ -76,5 +82,11 @@ class User:
         user_doc = user_ref.get()
         if user_doc.exists:
             user_data = user_doc.to_dict()
-            return User(user_data['user_id'], user_data['email'], user_data['password_hash'])
+            return User(
+                user_data['user_id'],
+                user_data['email'],
+                user_data['password_hash'],
+                user_data.get('account_created'),
+                user_data.get('last_login')
+            )
         return None
