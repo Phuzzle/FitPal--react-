@@ -12,4 +12,4 @@ if __name__ == '__main__':
         exit(1)
     
     app = create_app()
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=True)
