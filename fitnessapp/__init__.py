@@ -7,7 +7,7 @@ def create_app():
     app.config.from_object(Config)
 
     # Initialize Firebase
-    Config.init_firebase()
+    db = Config.init_firebase()
 
     # Initialize JWT
     JWTManager(app)
