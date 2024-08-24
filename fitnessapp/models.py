@@ -1,6 +1,7 @@
 from config import db
 from firebase_admin import firestore
 import datetime
+from statistics import mean
 
 class User:
     def __init__(self, user_id, email, password_hash):
@@ -46,6 +47,28 @@ class User:
         workouts_ref = db.collection('users').document(self.user_id).collection('workouts')
         query = workouts_ref.order_by('timestamp', direction=firestore.Query.DESCENDING).limit(limit)
         return [doc.to_dict() for doc in query.get()]
+
+    def get_workout_stats(self):
+        workouts = self.get_workouts(limit=100)  # Get the last 100 workouts for stats
+        if not workouts:
+            return None
+
+        total_duration = sum(workout.get('duration', 0) for workout in workouts)
+        avg_duration = total_duration / len(workouts)
+
+        workout_types = {}
+        for workout in workouts:
+            workout_type = workout.get('type', 'Unknown')
+            workout_types[workout_type] = workout_types.get(workout_type, 0) + 1
+
+        most_common_type = max(workout_types, key=workout_types.get)
+
+        return {
+            'total_workouts': len(workouts),
+            'avg_duration': avg_duration,
+            'most_common_type': most_common_type,
+            'type_distribution': workout_types
+        }
 
     @staticmethod
     def get_user_by_id(user_id):
