@@ -125,3 +125,41 @@ def update_exercise(exercise_id):
 def list_exercises():
     exercises = Exercise.get_all_exercises()
     return jsonify([exercise.to_dict() for exercise in exercises]), 200
+
+@main.route('/record_exercise', methods=['POST'])
+@jwt_required()
+def record_exercise():
+    current_user_id = get_jwt_identity()
+    user = User.get_user_by_id(current_user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"message": "No data provided"}), 400
+
+    required_fields = ['exercise_id', 'weight', 'sets', 'reps']
+    if not all(field in data for field in required_fields):
+        return jsonify({"message": "Missing required data"}), 400
+
+    exercise_id = data['exercise_id']
+    weight = data['weight']
+    sets = data['sets']
+    reps = data['reps']
+
+    user.record_exercise_completion(exercise_id, weight, sets, reps)
+    return jsonify({"message": "Exercise recorded successfully"}), 201
+
+@main.route('/exercise_history/<exercise_id>', methods=['GET'])
+@jwt_required()
+def get_exercise_history(exercise_id):
+    current_user_id = get_jwt_identity()
+    user = User.get_user_by_id(current_user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    history = user.get_exercise_history(exercise_id)
+    if history:
+        return jsonify(history), 200
+    else:
+        return jsonify({"message": "No history found for this exercise"}), 404

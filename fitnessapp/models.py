@@ -182,6 +182,42 @@ class User:
             'type_distribution': workout_types
         }
 
+    def record_exercise_completion(self, exercise_id, weight, sets, reps):
+        user_exercise_ref = db.collection('user_exercises').document(self.user_id).collection('exercises').document(exercise_id)
+        
+        # Get the current data
+        doc = user_exercise_ref.get()
+        if doc.exists:
+            current_data = doc.to_dict()
+            progression_history = current_data.get('progression_history', [])
+        else:
+            current_data = {}
+            progression_history = []
+
+        # Prepare the new data
+        new_entry = {
+            'weight': weight,
+            'sets': sets,
+            'reps': reps,
+            'date': firestore.SERVER_TIMESTAMP
+        }
+
+        # Update the document
+        user_exercise_ref.set({
+            'current_weight': weight,
+            'current_sets': sets,
+            'current_reps': reps,
+            'progression_history': firestore.ArrayUnion([new_entry]),
+            'last_performed': firestore.SERVER_TIMESTAMP
+        }, merge=True)
+
+    def get_exercise_history(self, exercise_id):
+        user_exercise_ref = db.collection('user_exercises').document(self.user_id).collection('exercises').document(exercise_id)
+        doc = user_exercise_ref.get()
+        if doc.exists:
+            return doc.to_dict()
+        return None
+
     @staticmethod
     def get_user_by_id(user_id):
         user_ref = db.collection('users').document(user_id)
