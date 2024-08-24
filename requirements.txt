@@ -2,4 +2,5 @@ Flask
 firebase-admin
 python-dotenv
 google-cloud-firestore
-# Add other dependencies here
+flask-jwt-extended
+Werkzeug

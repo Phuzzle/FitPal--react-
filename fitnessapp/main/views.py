@@ -1,15 +1,11 @@
+from flask import request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from fitnessapp.models import User
 from . import main
 
 @main.route('/')
 def index():
-    return "Hello, World!"
-
-# Add more route handlers here
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from fitnessapp.models import User
-
-main = Blueprint('main', __name__)
+    return "Welcome to the Fitness App!"
 
 @main.route('/add_workout', methods=['POST'])
 @jwt_required()
@@ -47,10 +43,11 @@ def dashboard():
         return jsonify({"message": "User not found"}), 404
 
     recent_workouts = user.get_workouts(limit=5)
-    # You can add more dashboard data here, such as workout statistics, goals, etc.
     
     return jsonify({
         "user_email": user.email,
         "recent_workouts": recent_workouts,
-        # Add more dashboard data here
+        "total_workouts": len(user.get_workouts()),
+        "account_created": user.account_created,
+        "last_login": user.last_login
     }), 200
