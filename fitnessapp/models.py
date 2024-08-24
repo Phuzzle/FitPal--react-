@@ -46,3 +46,12 @@ class User:
         workouts_ref = db.collection('users').document(self.user_id).collection('workouts')
         query = workouts_ref.order_by('timestamp', direction=firestore.Query.DESCENDING).limit(limit)
         return [doc.to_dict() for doc in query.get()]
+
+    @staticmethod
+    def get_user_by_id(user_id):
+        user_ref = db.collection('users').document(user_id)
+        user_doc = user_ref.get()
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            return User(user_data['user_id'], user_data['email'], user_data['password_hash'])
+        return None

@@ -1,7 +1,25 @@
 from flask import Flask
 from config import db
 
+from flask import Flask
+from flask_jwt_extended import JWTManager
+from config import Config
+from .main.views import main
+from .auth import auth
+
 def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    # Initialize Firebase
+    Config.init_firebase()
+
+    # Initialize JWT
+    jwt = JWTManager(app)
+
+    # Register blueprints
+    app.register_blueprint(main)
+    app.register_blueprint(auth)
     app = Flask(__name__)
     
     # Load configuration
