@@ -1,5 +1,5 @@
 import os
-from firebase_admin import credentials, initialize_app, firestore
+from firebase_admin import credentials, initialize_app, firestore, get_app
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
@@ -7,9 +7,14 @@ class Config:
     
     @staticmethod
     def init_firebase():
-        cred = credentials.Certificate(Config.FIREBASE_CREDENTIALS)
-        initialize_app(cred)
-        return firestore.client()
+        try:
+            # Try to get the existing app
+            app = get_app()
+        except ValueError:
+            # If the app doesn't exist, initialize it
+            cred = credentials.Certificate(Config.FIREBASE_CREDENTIALS)
+            app = initialize_app(cred)
+        return firestore.client(app)
 
 class DevelopmentConfig(Config):
     DEBUG = True
