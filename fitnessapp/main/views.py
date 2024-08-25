@@ -52,9 +52,7 @@ def dashboard():
     return jsonify({
         "user_email": user.email,
         "recent_workouts": recent_workouts,
-        "workout_stats": workout_stats,
-        "account_created": user.account_created,
-        "last_login": user.last_login
+        "workout_stats": workout_stats
     }), 200
 
 @main.route('/workout_stats', methods=['GET'])

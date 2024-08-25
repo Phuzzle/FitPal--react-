@@ -1,10 +1,6 @@
 from config import db
 from firebase_admin import firestore
-import datetime
 from statistics import mean
-from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
-
-from uuid import uuid4
 
 class Exercise:
     def __init__(self, name, type, muscle_group, description, instructions, 
@@ -111,12 +107,10 @@ class Exercise:
         }
 
 class User:
-    def __init__(self, user_id, email, password_hash, account_created=None, last_login=None):
+    def __init__(self, user_id, email, password_hash):
         self.user_id = user_id
         self.email = email
         self.password_hash = password_hash
-        self.account_created = account_created
-        self.last_login = last_login
 
     @staticmethod
     def create_user(email, password_hash):
@@ -124,9 +118,7 @@ class User:
         user_data = {
             'user_id': user_ref.id,
             'email': email,
-            'password_hash': password_hash,
-            'account_created': SERVER_TIMESTAMP,
-            'last_login': SERVER_TIMESTAMP
+            'password_hash': password_hash
         }
         user_ref.set(user_data)
         return User(user_ref.id, email, password_hash)
@@ -141,24 +133,17 @@ class User:
             return User(
                 user_data['user_id'],
                 user_data['email'],
-                user_data['password_hash'],
-                user_data.get('account_created'),
-                user_data.get('last_login')
+                user_data['password_hash']
             )
         return None
 
-    def update_last_login(self):
-        user_ref = db.collection('users').document(self.user_id)
-        user_ref.update({'last_login': SERVER_TIMESTAMP})
-
     def add_workout(self, workout_data):
         workouts_ref = db.collection('users').document(self.user_id).collection('workouts').document()
-        workout_data['timestamp'] = SERVER_TIMESTAMP
         workouts_ref.set(workout_data)
 
     def get_workouts(self, limit=10):
         workouts_ref = db.collection('users').document(self.user_id).collection('workouts')
-        query = workouts_ref.order_by('timestamp', direction=firestore.Query.DESCENDING).limit(limit)
+        query = workouts_ref.limit(limit)
         return [doc.to_dict() for doc in query.get()]
 
     def get_workout_stats(self):
@@ -197,8 +182,7 @@ class User:
         new_entry = {
             'weight': weight,
             'sets': sets,
-            'reps': reps,
-            'date': SERVER_TIMESTAMP
+            'reps': reps
         }
         user_exercise_ref.update({
             'progression_history': firestore.ArrayUnion([new_entry])
@@ -220,8 +204,6 @@ class User:
             return User(
                 user_data['user_id'],
                 user_data['email'],
-                user_data['password_hash'],
-                user_data.get('account_created'),
-                user_data.get('last_login')
+                user_data['password_hash']
             )
         return None
