@@ -1,1 +1,1 @@
-post set up for log in which connects to firestore
+api set up for login and for workout logging
