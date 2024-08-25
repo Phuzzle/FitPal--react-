@@ -185,15 +185,6 @@ class User:
     def record_exercise_completion(self, exercise_id, weight, sets, reps):
         user_exercise_ref = db.collection('user_exercises').document(self.user_id).collection('exercises').document(exercise_id)
         
-        # Get the current data
-        doc = user_exercise_ref.get()
-        if doc.exists:
-            current_data = doc.to_dict()
-            progression_history = current_data.get('progression_history', [])
-        else:
-            current_data = {}
-            progression_history = []
-
         # Prepare the new data
         new_entry = {
             'weight': weight,
@@ -207,9 +198,18 @@ class User:
             'current_weight': weight,
             'current_sets': sets,
             'current_reps': reps,
-            'progression_history': firestore.ArrayUnion([new_entry]),
             'last_performed': firestore.SERVER_TIMESTAMP
         }, merge=True)
+
+        # Add the new entry to the progression history
+        user_exercise_ref.update({
+            'progression_history': firestore.ArrayUnion([{
+                'weight': weight,
+                'sets': sets,
+                'reps': reps,
+                'date': firestore.SERVER_TIMESTAMP
+            }])
+        })
 
     def get_exercise_history(self, exercise_id):
         user_exercise_ref = db.collection('user_exercises').document(self.user_id).collection('exercises').document(exercise_id)
