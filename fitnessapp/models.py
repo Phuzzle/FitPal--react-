@@ -189,8 +189,7 @@ class User:
         user_exercise_ref.set({
             'current_weight': weight,
             'current_sets': sets,
-            'current_reps': reps,
-            'last_performed': firestore.SERVER_TIMESTAMP
+            'current_reps': reps
         }, merge=True)
 
         # Add the new entry to the progression history
