@@ -174,6 +174,21 @@ class User:
             'type_distribution': workout_types
         }
 
+    def record_exercise_completion(self, exercise_id, weight, sets, reps):
+        exercise_completion = {
+            'exercise_id': exercise_id,
+            'weight': weight,
+            'sets': sets,
+            'reps': reps,
+            'timestamp': firestore.SERVER_TIMESTAMP
+        }
+        db.collection('users').document(self.user_id).collection('exercise_completions').add(exercise_completion)
+
+    def get_exercise_history(self, exercise_id):
+        completions_ref = db.collection('users').document(self.user_id).collection('exercise_completions')
+        query = completions_ref.where('exercise_id', '==', exercise_id).order_by('timestamp', direction=firestore.Query.DESCENDING)
+        return [doc.to_dict() for doc in query.stream()]
+
     @staticmethod
     def get_user_by_id(user_id):
         user_ref = db.collection('users').document(user_id)
