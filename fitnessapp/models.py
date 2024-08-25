@@ -185,15 +185,7 @@ class User:
     def record_exercise_completion(self, exercise_id, weight, sets, reps):
         user_exercise_ref = db.collection('user_exercises').document(self.user_id).collection('exercises').document(exercise_id)
         
-        # Prepare the new data
-        new_entry = {
-            'weight': weight,
-            'sets': sets,
-            'reps': reps,
-            'date': firestore.SERVER_TIMESTAMP
-        }
-
-        # Update the document
+        # Update the current exercise data
         user_exercise_ref.set({
             'current_weight': weight,
             'current_sets': sets,
