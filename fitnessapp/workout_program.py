@@ -111,8 +111,6 @@ class WorkoutProgram:
         program_ref.delete()
 
 def create_workout_program():
-    @jwt_required()
-    def wrapper():
         current_user_id = get_jwt_identity()
         user = User.get_user_by_id(current_user_id)
         if not user:

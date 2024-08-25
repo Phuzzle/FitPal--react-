@@ -164,9 +164,9 @@ def get_exercise_history(exercise_id):
         return jsonify({"message": "No history found for this exercise"}), 404
 
 @main.route('/create_workout_program', methods=['POST'])
-@create_workout_program()
+@jwt_required()
 def create_program():
-    pass
+    return create_workout_program()
 
 @main.route('/available_exercises', methods=['GET'])
 @get_available_exercises()
