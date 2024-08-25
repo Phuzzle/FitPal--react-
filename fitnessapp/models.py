@@ -2,6 +2,7 @@ from config import db
 from firebase_admin import firestore
 import datetime
 from statistics import mean
+from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
 
 from uuid import uuid4
 
@@ -124,8 +125,8 @@ class User:
             'user_id': user_ref.id,
             'email': email,
             'password_hash': password_hash,
-            'account_created': firestore.SERVER_TIMESTAMP,
-            'last_login': firestore.SERVER_TIMESTAMP
+            'account_created': SERVER_TIMESTAMP,
+            'last_login': SERVER_TIMESTAMP
         }
         user_ref.set(user_data)
         return User(user_ref.id, email, password_hash)
@@ -148,11 +149,11 @@ class User:
 
     def update_last_login(self):
         user_ref = db.collection('users').document(self.user_id)
-        user_ref.update({'last_login': firestore.SERVER_TIMESTAMP})
+        user_ref.update({'last_login': SERVER_TIMESTAMP})
 
     def add_workout(self, workout_data):
         workouts_ref = db.collection('users').document(self.user_id).collection('workouts').document()
-        workout_data['timestamp'] = firestore.SERVER_TIMESTAMP
+        workout_data['timestamp'] = SERVER_TIMESTAMP
         workouts_ref.set(workout_data)
 
     def get_workouts(self, limit=10):
@@ -197,7 +198,7 @@ class User:
             'weight': weight,
             'sets': sets,
             'reps': reps,
-            'date': firestore.SERVER_TIMESTAMP
+            'date': SERVER_TIMESTAMP
         }
         user_exercise_ref.update({
             'progression_history': firestore.ArrayUnion([new_entry])
