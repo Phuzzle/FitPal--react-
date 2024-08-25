@@ -107,10 +107,12 @@ class Exercise:
         }
 
 class User:
-    def __init__(self, user_id, email, password_hash):
+    def __init__(self, user_id, email, password_hash, workout_counter=0, exercise_completion_counter=0):
         self.user_id = user_id
         self.email = email
         self.password_hash = password_hash
+        self.workout_counter = workout_counter
+        self.exercise_completion_counter = exercise_completion_counter
 
     @staticmethod
     def create_user(email, password_hash):
@@ -118,10 +120,12 @@ class User:
         user_data = {
             'user_id': user_ref.id,
             'email': email,
-            'password_hash': password_hash
+            'password_hash': password_hash,
+            'workout_counter': 0,
+            'exercise_completion_counter': 0
         }
         user_ref.set(user_data)
-        return User(user_ref.id, email, password_hash)
+        return User(user_ref.id, email, password_hash, 0, 0)
 
     @staticmethod
     def get_user_by_email(email):
@@ -138,12 +142,17 @@ class User:
         return None
 
     def add_workout(self, workout_data):
-        workouts_ref = db.collection('users').document(self.user_id).collection('workouts').document()
+        self.workout_counter += 1
+        workout_data['workout_id'] = self.workout_counter
+        workouts_ref = db.collection('users').document(self.user_id).collection('workouts').document(str(self.workout_counter))
         workouts_ref.set(workout_data)
+        
+        # Update the workout counter in the user document
+        db.collection('users').document(self.user_id).update({'workout_counter': self.workout_counter})
 
     def get_workouts(self, limit=10):
         workouts_ref = db.collection('users').document(self.user_id).collection('workouts')
-        query = workouts_ref.limit(limit)
+        query = workouts_ref.order_by('workout_id', direction=firestore.Query.DESCENDING).limit(limit)
         return [doc.to_dict() for doc in query.get()]
 
     def get_workout_stats(self):
@@ -169,6 +178,7 @@ class User:
         }
 
     def record_exercise_completion(self, exercise_id, weight, sets, reps):
+        self.exercise_completion_counter += 1
         user_exercise_ref = db.collection('user_exercises').document(self.user_id).collection('exercises').document(exercise_id)
         
         # Update the current exercise data
@@ -180,6 +190,7 @@ class User:
 
         # Add the new entry to the progression history
         new_entry = {
+            'completion_id': self.exercise_completion_counter,
             'weight': weight,
             'sets': sets,
             'reps': reps
@@ -187,6 +198,9 @@ class User:
         user_exercise_ref.update({
             'progression_history': firestore.ArrayUnion([new_entry])
         })
+
+        # Update the exercise completion counter in the user document
+        db.collection('users').document(self.user_id).update({'exercise_completion_counter': self.exercise_completion_counter})
 
     def get_exercise_history(self, exercise_id):
         user_exercise_ref = db.collection('user_exercises').document(self.user_id).collection('exercises').document(exercise_id)
