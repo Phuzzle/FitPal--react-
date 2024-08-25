@@ -135,12 +135,37 @@ def create_workout_program():
             return jsonify({"message": "Invalid frequency. Choose 3, 4, or 5."}), 400
 
         # Validate exercises
-        valid_exercises = [exercise for category in EXERCISE_CATEGORIES.values() for exercise in category]
-        if not all(exercise in valid_exercises for exercise in exercises):
-            return jsonify({"message": "Invalid exercise selection"}), 400
+        exercise_counts = {
+            "Compound, pec-dominant": 2,
+            "Compound, shoulder-dominant": 2,
+            "Compound, upper back horizontal": 2,
+            "Compound, upper back vertical": 2,
+            "Compound, hip-dominant": 1,
+            "Compound, knee-dominant": 1,
+            "Calves": 2,
+            "Hip-dominant accessory": 1,
+            "Quad-dominant accessory": 1
+        }
+
+        selected_exercises = {}
+        for exercise in exercises:
+            for category, exercise_list in EXERCISE_CATEGORIES.items():
+                if exercise in exercise_list:
+                    if category not in selected_exercises:
+                        selected_exercises[category] = []
+                    selected_exercises[category].append(exercise)
+                    break
+
+        # Check if the correct number of exercises are selected for each category
+        for category, count in exercise_counts.items():
+            if category not in selected_exercises or len(selected_exercises[category]) != count:
+                return jsonify({"message": f"Invalid exercise selection. Please select {count} exercise(s) from {category}"}), 400
+
+        # Flatten the selected exercises list
+        final_exercises = [exercise for sublist in selected_exercises.values() for exercise in sublist]
 
         # Create the workout program
-        program = WorkoutProgram.create_program(current_user_id, name, frequency, exercises)
+        program = WorkoutProgram.create_program(current_user_id, name, frequency, final_exercises)
 
         return jsonify({
             "message": "Workout program created successfully",
