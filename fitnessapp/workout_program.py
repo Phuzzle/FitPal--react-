@@ -174,11 +174,5 @@ def create_workout_program():
             }
         }), 201
 
-    return wrapper
-
 def get_available_exercises():
-    @jwt_required()
-    def wrapper():
-        return jsonify(EXERCISE_CATEGORIES), 200
-
-    return wrapper
+    return jsonify(EXERCISE_CATEGORIES), 200

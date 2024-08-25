@@ -169,6 +169,6 @@ def create_program():
     return create_workout_program()
 
 @main.route('/available_exercises', methods=['GET'])
-@get_available_exercises()
+@jwt_required()
 def available_exercises():
-    pass
+    return get_available_exercises()
