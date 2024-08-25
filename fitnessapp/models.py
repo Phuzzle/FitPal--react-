@@ -194,13 +194,14 @@ class User:
         }, merge=True)
 
         # Add the new entry to the progression history
+        new_entry = {
+            'weight': weight,
+            'sets': sets,
+            'reps': reps,
+            'date': firestore.SERVER_TIMESTAMP
+        }
         user_exercise_ref.update({
-            'progression_history': firestore.ArrayUnion([{
-                'weight': weight,
-                'sets': sets,
-                'reps': reps,
-                'date': firestore.SERVER_TIMESTAMP
-            }])
+            'progression_history': firestore.ArrayUnion([new_entry])
         })
 
     def get_exercise_history(self, exercise_id):
