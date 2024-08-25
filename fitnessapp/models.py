@@ -150,6 +150,7 @@ class User:
 
     def get_workouts(self, limit=10):
         workouts_ref = db.collection('users').document(self.user_id).collection('workouts')
+        query = workouts_ref.limit(limit)
         return [doc.to_dict() for doc in query.get()]
 
     def get_workout_stats(self):
