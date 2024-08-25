@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from fitnessapp.models import User, Exercise
+from fitnessapp.workout_program import create_workout_program, get_available_exercises
 from . import main
 
 @main.route('/')
@@ -161,3 +162,13 @@ def get_exercise_history(exercise_id):
         return jsonify(history), 200
     else:
         return jsonify({"message": "No history found for this exercise"}), 404
+
+@main.route('/create_workout_program', methods=['POST'])
+@create_workout_program()
+def create_program():
+    pass
+
+@main.route('/available_exercises', methods=['GET'])
+@get_available_exercises()
+def available_exercises():
+    pass
