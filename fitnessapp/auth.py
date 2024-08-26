@@ -33,7 +33,6 @@ def login():
     if not user or not check_password_hash(user.password_hash, password):
         return jsonify({"message": "Invalid email or password"}), 401
 
-    user.update_last_login()
     access_token = create_access_token(identity=user.user_id)
     return jsonify({"access_token": access_token}), 200
 
@@ -48,6 +47,5 @@ def profile():
     return jsonify({
         "user_id": user.user_id,
         "email": user.email,
-        "account_created": user.account_created.isoformat() if user.account_created else None,
-        "last_login": user.last_login.isoformat() if user.last_login else None
+        "account_created": user.account_created.isoformat() if user.account_created else None
     }), 200
